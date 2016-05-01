@@ -14,104 +14,83 @@ typedef struct _index{
 	struct _index *prev;
 }index;
 
+void pause(){
+	printf("\n\tPRESSIONE QUALQUER TECLA...");
+	getchar();
+	getchar();
+}
 
 void view_groups(index *id){
 	
 	index *aux_id = id;
 	node *aux_group;
 	
+	if (!aux_id){
+		printf("\n\tNAO EXISTE CONJUNTOS ALOCADOS\n\t");
+	}
+	
 	while(aux_id){
 		
 		printf("\tCONJUNTO %d: {", aux_id->id);
 		
 		if(aux_id->group){
-			aux_id->group = aux_group;
-			while(aux_group->next){
-				printf("%d, ", aux_group->info);
+			aux_group = aux_id->group;
+			while(aux_group){
+				printf("%d", aux_group->info);
+				if(aux_group->next){
+					printf(", ");
+				}else{
+					printf("}");
+				}
 				aux_group = aux_group->next;
 			}
 			
 		}else{
 			
-			printf(" VAZIO ");
+		printf(" VAZIO }");
 			
 		}
-		printf("}\n");
+		printf("\n");
 		aux_id = aux_id->next;
 	}
 	printf("\n\t");
-	getchar();
+	pause();
 	
 }
 
 
-index *delete_group(index *id, int ref){//LACO INFINITO
+index *delete_group(index *id, int ref){
 	
+	index *aux_id = id; 
 	index *previous = NULL;
-	index *aux_id = id;
-	
-	if (!aux_id){
-		
-		printf("\n\tNAO EXISTE CONJUNTOS ALOCADOS\n\t");
-		getchar();
-		return id;
-		
-	}
-	
-	while(aux_id && aux_id->id != ref){
+	node *aux_group = aux_id->group; 
+
+	while(aux_id->next || aux_id->id != ref){
 		previous = aux_id;
 		aux_id = aux_id->next;
-	}
-	
-	if (!previous){
-
-		printf("0 AUX: %d\n", aux_id->id);
-		//printf("AUX : %d\n", previous->id);
-
-		previous = aux_id->next;
-		printf("1 AUX: %d\n", aux_id->id);
-		printf("2 AUX : %d\n", previous->id);
-		previous->prev = NULL;
-		printf("3 AUX: %d\n", aux_id->id);
-		printf("4 AUX : %d\n", previous->id);
-		free(aux_id);
-		printf("5 AUX: %d\n", aux_id->id);
-		printf("6 AUX : %d\n", previous->id);
-		
-		while(previous->next){
-			previous = previous->next;
-			previous->id--;
+		if(!aux_id->next && aux_id->id != ref){
+			printf("\n\tCONJUNTO INEXITENTE\n\t");
+			pause();
+			return id;
 		}
-		printf("7 AUX: %d\n", aux_id->id);
-		printf("8 AUX : %d\n", previous->id);
-		
-		getchar();
-		return id;
-		
-	}else{
-		
-		previous->next = aux_id->next;
-		printf("9 AUX: %d\n", aux_id->id);
-		printf("10 PREV : %d\n", previous->id);
-		aux_id->prev = previous;
-		printf("11 AUX: %d\n", aux_id->id);
-		printf("12 PREV : %d\n", previous->id);
-		
-		getchar();
-		
 	}
 	
-	free(aux_id);
+	if(!aux_id->next && !aux_id->prev){
+		free(aux_group);
+		free(aux_id);
+		return NULL;
+	}else{
+		previous->next = aux_id->next;
+		aux_id->next = previous;
+		free(aux_group);
+		free(aux_id);
+	}
 	
 	while(previous->next){
 		previous = previous->next;
-		printf("AUX: %d\n", aux_id->id);
-		printf("PREV : %d\n", previous->id);
 		previous->id--;
-		printf("AUX: %d\n", aux_id->id);
-		printf("PREV : %d\n", previous->id);
-		getchar();
 	}
+	
 	return id;
 	
 }
@@ -122,7 +101,7 @@ index *add_gr(index *id){
 	index *new_id = (index *)malloc(sizeof(index));
 	if(!new_id){
 		printf("\nERRO DE ALOCACAO\n");
-		exit(1);
+		return id;
 	}
 	
 	if(!id){
@@ -162,45 +141,150 @@ index *add_info(index *id, int ref, int info){
 	
 	node *new = (node *)malloc(sizeof(node));
 	if(!new){
-		printf("\nERRO DE ALOCACAO\n");
-		exit(1);
+		printf("\nERRO DE ALOCACAO");
+		pause();
+		return id;
 	}
 	
 	new->info = info;
 	new->next = NULL;
 	
-	while(aux_id->id != ref && aux_id->next){
+	while(aux_id->next && aux_id->id != ref){
 		aux_id = aux_id->next;
+		if(!aux_id->next && aux_id->id != ref ){
+			printf("\n\tCONJUNTO NAO ENCONTRADO");
+			pause();
+			return id;
+		}
 	}
 	
 	if(!aux_id->group){
-		
 		aux_id->group = new;
 		new->prev = aux_id->group;
-		printf("VALORES ALOCADOS\n\t");
-		getchar();
 		return id;
-		
 	}else{
-		
-		aux_id->group = aux_group;
+		aux_group = aux_id->group;
 		
 		while(aux_group->next){
 			aux_group = aux_group->next;
 		}
 		
-		printf("VALORES ALOCADOS\n\t");
-		getchar();
-		
 		aux_group->next = new;
 		new->prev = aux_group;
 		
-		return aux_id;
+		return id;
 
 	}
 	
 }
 
+index *del_info(index *id, int ref, int info){
+	
+	index *aux_id = id; 
+	node *previous;
+	node *aux_group;
+
+	while(aux_id->next || aux_id->id != ref){
+		aux_id = aux_id->next;
+	}
+	printf("%d\n", info);
+	printf("Chegou Aqui!!!    ");
+	printf("%d\n", aux_id->id);
+	aux_group = aux_id->group;
+	printf("Info: %d\n", aux_group->info);
+
+	while(aux_group->next || aux_group->info != info){
+		previous = aux_id->group;
+		aux_group = aux_group->next;
+		printf("%d\n", aux_group->info);
+		printf("Aqui Tambem!\n");
+		if(!aux_group->next && aux_group->info != info){
+			printf("\n\tVALOR NAO ENCONTRADO\n\t");
+			pause();
+			return id;
+		}
+
+	}
+	
+	if(!aux_group->next && !aux_group->prev){
+		aux_id->group = NULL;
+		free(aux_group);
+	}else{
+		previous->next = aux_group->next;
+		//aux_group = aux_group->next;
+		//aux_group->prev = previous;
+		aux_group->next = previous;
+		free(aux_group);
+	}
+	
+	return id;
+
+	/*
+	index *aux_id = id;
+	node *aux_group;
+	node *previous_group = NULL;
+
+	
+	while(aux_id->next || aux_id->id != ref){
+		aux_id = aux_id->next;
+	}
+
+	aux_group = aux_id->group;
+
+	while(aux_group->next || aux_group->info != info){
+		previous_group = aux_group;
+		aux_group = aux_group->next;
+	}
+	
+	//previous_group->next = aux_group->next;
+	//aux_group->next = previous_group;
+	aux_group->info = 0;
+
+	pause();
+	
+	//free(aux_group);
+	
+	return id;
+	*/
+}
+
+int qtd_groups(index *id){
+	
+	index *aux_id = id;
+	
+	if(!aux_id){
+		return 0;
+	}else{
+		while(aux_id->next){
+			aux_id = aux_id->next;
+		}
+		return aux_id->id;
+	}
+	
+}
+
+int search_elem(index *id, int ref){
+	
+	index *aux_id = id;
+	
+	while(aux_id->next && aux_id->id != ref){
+		aux_id = aux_id->next;
+	}
+	
+	if(ref > aux_id->id || ref <= 0){
+		printf("\n\tCONJUNTO INEXISTENTE");	
+		pause();
+		return 0;
+	}
+	
+	if(!aux_id->next && aux_id->id != ref){
+		printf("\n\tCONJUNTO NAO ENCONTRADO");	
+		pause();
+		return 0;
+	}
+	
+	return 1;
+}
 
 int main(){
 
@@ -210,14 +294,17 @@ int main(){
 	
 	do{
 		system("clear");
+		//system("cls");
+		//fflush(stdin);
 		printf("\n\tTRABALHO NP1 - CONJUNTOS EM ALOCACAO DINAMICA\n\n");
 		printf("\n\tESCOLHA UMA OPCAO\n\n");
-		printf("\t0 - FECHAR\n");
 		printf("\t1 - INSERIR CONJUNTO\n");
 		printf("\t2 - REMOVER CONJUNTO\n");
 		printf("\t3 - INSERIR ELEMENTOS NO CONJUNTO\n");
 		printf("\t4 - REMOVER ELEMENTOS NO CONJUNTO\n");
 		printf("\t5 - VISUALIZAR CONJUNTOS\n");
+		printf("\t0 - FECHAR");
+		printf("\t\t\tCONJUNTOS ALOCADOS: %d\n", qtd_groups(id));
 		printf("\n\tOPCAO: ");
 		//printf("\t5 - INTERSECCAO\n");
 		//printf("\t6 - UNIAO\n");
@@ -235,33 +322,68 @@ int main(){
 			break;
 			
 			case 2:
-				printf("\n\tQUAL CONJUNTO REMOVER?  ");
-				scanf("%d", &ref);
-				id = delete_group(id, ref);
+			
+				if(!id){
+					printf("\n\tNENHUM CONJUNTO ALOCADO");
+					pause();					
+				}else{
+					printf("\n\tSELECIONE O CONJUNTO: ");
+					scanf("%d", &ref);
+					if(search_elem(id, ref)){
+						id = delete_group(id, ref);
+					}
+				}
 				
 			break;
 			
-			case 3:		
-				printf("\n\tSELECIONE O CONJUNTO: ");
-				scanf("%d", &ref);
-				printf("\tQUANTIDADE DE VALORES A INSERIR: ");
-				scanf("%d", &num);
-				for(i=0; i<num; i++){
-		
-					scanf("%d", &info);		
-					id = add_info(id, ref, info);
-					
+			case 3:
+			
+				if(!id){
+					printf("\n\tNENHUM CONJUNTO ALOCADO");
+					pause();					
+				}else{
+					printf("\n\tSELECIONE O CONJUNTO: ");
+					scanf("%d", &ref);
+					if(search_elem(id, ref)){
+						
+						printf("\tQUANTIDADE DE VALORES A INSERIR: ");
+						scanf("%d", &num);
+						printf("\n");
+						
+						for(i=0; i<num; i++){
+							printf("\tVALOR: ");
+							scanf("%d", &info);		
+							id = add_info(id, ref, info);
+						}
+						
+					}
 				}
 				
 			break;
 			
 			case 4:
 				
+				if(!id){
+					printf("\n\tNENHUM CONJUNTO ALOCADO");
+					pause();					
+				}else{
+					printf("\n\tSELECIONE O CONJUNTO: ");
+					scanf("%d", &ref);
+					if(search_elem(id, ref)){
+						
+						printf("\n\tVALOR: ");
+						scanf("%d", &info);
+						printf("Excluir: %d\n", info);
+						id = del_info(id, ref, info);
+						
+					}
+				}
+				
+				
 			break;
 		
 			case 5:
 				view_groups(id);
-				getchar();
 			break;
 			
 			case 6:
@@ -270,6 +392,11 @@ int main(){
 			
 			case 7:
 				
+			break;
+			
+			default:
+				printf("\n\tOPCAO INVALIDA");
+				pause();
 			break;
 		}
 		
